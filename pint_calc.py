@@ -114,7 +114,7 @@ class wxPintCalc(wx.Frame):
         unit_out = self.FindWindowByName('unit_out')
         unit_out.ChangeValue('')
         for un in self.conv_units:
-            unit_out.AppendText(str(un) + "\n")
+            unit_out.AppendText(str(un) + "\n\n")
 
     def magnitude_input(self, event):
         mag_c = self.FindWindowByName('mag_c')
@@ -126,7 +126,7 @@ class wxPintCalc(wx.Frame):
         mag_out = self.FindWindowByName('mag_out')
         mag_out.ChangeValue('')
         for mag in self.conv_magnitudes:
-            mag_out.AppendText(str(mag) + "\n")
+            mag_out.AppendText("{:.3e}\n\n".format(mag))
 
 
 try:
