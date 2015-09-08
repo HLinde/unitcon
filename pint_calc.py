@@ -14,11 +14,6 @@ nasty_units = False
 TITLE = "Have a pint."
 
 
-def safer_eval(string):
-    """Safer version of eval() as globals and builtins are inaccessible"""
-    return str(eval(string, {'__builtins__': {}}))
-
-
 class wxPintCalc(wx.Frame):
     """
     Unit conversion calculator.
