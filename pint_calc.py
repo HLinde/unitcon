@@ -9,6 +9,7 @@ Created on Mon Sep 07 13:40:14 2015
 
 import wx
 import pint
+import numpy as np
 
 nasty_units = False
 TITLE = "Have a pint."
@@ -75,17 +76,22 @@ class wxPintCalc(wx.Frame):
         unit_c.SetValue(str(self.units))
         unit_c.Bind(wx.EVT_TEXT_ENTER, self.unit_input)
 
-        unit_out_c = wx.TextCtrl(self.panel, name='unit_out_c',
-                                 style=wx.TE_PROCESS_ENTER)
-        unit_out_c.SetValue(str(self.conv_units))
-        unit_out_c.Bind(wx.EVT_TEXT_ENTER, self.unit_request)
+        unit_out = wx.TextCtrl(self.panel, name='unit_out',
+                                 style=wx.TE_READONLY)
+        self.set_unit_out()
+        unit_out.SetValue(str(self.conv_units))
 
         mag_out = wx.TextCtrl(self.panel, style=wx.TE_READONLY, name='mag_out')
         self.set_mag_out()
 
         sizer.AddMany([(empty_txt), (magnitude_txt), (unit_txt),
                       (in_txt), (mag_c, 1, wx.EXPAND), (unit_c, 1, wx.EXPAND),
-                      (out_txt), (mag_out), (unit_out_c, 1, wx.EXPAND)])
+                      (out_txt), (mag_out, 1, wx.EXPAND),
+                      (unit_out, 1, wx.EXPAND)])
+
+        sizer.AddGrowableRow(2, 1)
+        sizer.AddGrowableCol(1, 2)
+        sizer.AddGrowableCol(2, 1)
 
         self.panel.SetSizer(sizer)
 
@@ -104,14 +110,16 @@ class wxPintCalc(wx.Frame):
         unit_c = self.FindWindowByName('unit_c')
         value = unit_c.GetValue()
         self.quantity = self.magnitude * unit(value)
+        self.set_unit_out()
         self.conv_quantity = self.quantity.to(self.conv_units)
         self.set_mag_out()
 
-    def unit_request(self, event):
-        unit_out_c = self.FindWindowByName('unit_out_c')
-        value = unit_out_c.GetValue()
-        self.conv_quantity = self.quantity.to(str(unit(value)))
-        self.set_mag_out()
+    def set_unit_out(self):
+        compatible_units = list(self.quantity.compatible_units())
+        chosen_one = compatible_units[np.random.randint(len(compatible_units))]
+        self.conv_quantity = self.quantity.to(str(unit(chosen_one)))
+        unit_out = self.FindWindowByName('unit_out')
+        unit_out.ChangeValue(str(self.conv_units))
 
 try:
     if nasty_units:
@@ -119,6 +127,7 @@ try:
     else:
         unit = pint.UnitRegistry("unit_definitions.txt")
 except ValueError:
+    print "using default unit definitions from pint"
     unit = pint.UnitRegistry() # use default, if no files are found
 
 if __name__ == '__main__':
