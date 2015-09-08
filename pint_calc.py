@@ -11,7 +11,7 @@ import wx
 import pint
 import numpy as np
 
-nasty_units = False
+nasty_units = True
 TITLE = "Have a pint."
 
 
@@ -30,7 +30,6 @@ class wxPintCalc(wx.Frame):
 
         # defaults
         self.quantity = unit.meter
-        self.conv_quantity = self.quantity.to("kilometer")
 
         self.init_UI()
         self.Show()
@@ -44,12 +43,19 @@ class wxPintCalc(wx.Frame):
         return self.quantity.units
 
     @property
-    def conv_magnitude(self):
-        return self.conv_quantity.magnitude
+    def conv_quantities(self):
+        return [self.quantity.to(comp_unit) for comp_unit
+                in self.quantity.compatible_units()]
+
+    @property
+    def conv_magnitudes(self):
+        return [conv_quantity.magnitude for conv_quantity
+                in self.conv_quantities]
 
     @property
     def conv_units(self):
-        return self.conv_quantity.units
+        return [conv_quantity.units for conv_quantity
+                in self.conv_quantities]
 
     def init_UI(self):
         self.init_panel()
@@ -67,21 +73,23 @@ class wxPintCalc(wx.Frame):
         in_txt = wx.StaticText(self.panel, label="Input")
         out_txt = wx.StaticText(self.panel, label="Output")
 
-        mag_c = wx.TextCtrl(self.panel, name='mag_c')
+        mag_c = wx.TextCtrl(self.panel, name='mag_c', style=wx.TE_RIGHT)
         mag_c.SetValue(str(self.magnitude))
         mag_c.Bind(wx.EVT_TEXT, self.magnitude_input)
 
         unit_c = wx.TextCtrl(self.panel, name='unit_c',
-                             style=wx.TE_PROCESS_ENTER)
+                             style=wx.TE_PROCESS_ENTER | wx.TE_LEFT)
         unit_c.SetValue(str(self.units))
         unit_c.Bind(wx.EVT_TEXT_ENTER, self.unit_input)
 
         unit_out = wx.TextCtrl(self.panel, name='unit_out',
-                                 style=wx.TE_READONLY)
+                               style=wx.TE_READONLY | wx.TE_MULTILINE |
+                               wx.TE_LEFT)
         self.set_unit_out()
-        unit_out.SetValue(str(self.conv_units))
 
-        mag_out = wx.TextCtrl(self.panel, style=wx.TE_READONLY, name='mag_out')
+        mag_out = wx.TextCtrl(self.panel,
+                              style=wx.TE_READONLY | wx.TE_MULTILINE |
+                              wx.TE_RIGHT, name='mag_out')
         self.set_mag_out()
 
         sizer.AddMany([(empty_txt), (magnitude_txt), (unit_txt),
@@ -95,31 +103,31 @@ class wxPintCalc(wx.Frame):
 
         self.panel.SetSizer(sizer)
 
-    def magnitude_input(self, event):
-        mag_c = self.FindWindowByName('mag_c')
-        value = mag_c.GetValue()
-        self.quantity *= float(value) / self.magnitude
-        self.conv_quantity = self.quantity.to(self.conv_units)
-        self.set_mag_out()
-
-    def set_mag_out(self):
-        mag_out = self.FindWindowByName('mag_out')
-        mag_out.ChangeValue(str(self.conv_magnitude))
-
     def unit_input(self, event):
         unit_c = self.FindWindowByName('unit_c')
         value = unit_c.GetValue()
         self.quantity = self.magnitude * unit(value)
         self.set_unit_out()
-        self.conv_quantity = self.quantity.to(self.conv_units)
         self.set_mag_out()
 
     def set_unit_out(self):
-        compatible_units = list(self.quantity.compatible_units())
-        chosen_one = compatible_units[np.random.randint(len(compatible_units))]
-        self.conv_quantity = self.quantity.to(str(unit(chosen_one)))
         unit_out = self.FindWindowByName('unit_out')
-        unit_out.ChangeValue(str(self.conv_units))
+        unit_out.ChangeValue('')
+        for un in self.conv_units:
+            unit_out.AppendText(str(un) + "\n")
+
+    def magnitude_input(self, event):
+        mag_c = self.FindWindowByName('mag_c')
+        value = mag_c.GetValue()
+        self.quantity *= float(value) / self.magnitude
+        self.set_mag_out()
+
+    def set_mag_out(self):
+        mag_out = self.FindWindowByName('mag_out')
+        mag_out.ChangeValue('')
+        for mag in self.conv_magnitudes:
+            mag_out.AppendText(str(mag) + "\n")
+
 
 try:
     if nasty_units:
@@ -128,7 +136,7 @@ try:
         unit = pint.UnitRegistry("unit_definitions.txt")
 except ValueError:
     print "using default unit definitions from pint"
-    unit = pint.UnitRegistry() # use default, if no files are found
+    unit = pint.UnitRegistry()  # use default, if no files are found
 
 if __name__ == '__main__':
     app = wx.App()
