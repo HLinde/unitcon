@@ -131,9 +131,9 @@ class wxPintCalc(wx.Frame):
 
 try:
     if nasty_units:
-        unit = pint.UnitRegistry("unit_definitions_all.txt")
+        unit = pint.UnitRegistry("data/unit_definitions_all.txt")
     else:
-        unit = pint.UnitRegistry("unit_definitions.txt")
+        unit = pint.UnitRegistry("data/unit_definitions.txt")
 except ValueError:
     print "using default unit definitions from pint"
     unit = pint.UnitRegistry()  # use default, if no files are found
