@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Units-converter using pint and wxwidgets
@@ -45,7 +46,8 @@ class wxPintCalc(wx.Frame):
     @property
     def conv_quantities(self):
         return [self.quantity.to(comp_unit) for comp_unit
-                in self.quantity.compatible_units()]
+                in sorted(self.quantity.compatible_units(),
+                          key=lambda s: s.lower())]
 
     @property
     def conv_magnitudes(self):
@@ -131,9 +133,9 @@ class wxPintCalc(wx.Frame):
 
 try:
     if nasty_units:
-        unit = pint.UnitRegistry("unit_definitions_all.txt")
+        unit = pint.UnitRegistry("data/unit_definitions_all.txt")
     else:
-        unit = pint.UnitRegistry("unit_definitions.txt")
+        unit = pint.UnitRegistry("data/unit_definitions.txt")
 except ValueError:
     print "using default unit definitions from pint"
     unit = pint.UnitRegistry()  # use default, if no files are found
