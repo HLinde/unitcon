@@ -46,7 +46,8 @@ class wxPintCalc(wx.Frame):
     @property
     def conv_quantities(self):
         return [self.quantity.to(comp_unit) for comp_unit
-                in self.quantity.compatible_units()]
+                in sorted(self.quantity.compatible_units(),
+                          key=lambda s: s.lower())]
 
     @property
     def conv_magnitudes(self):
