@@ -30,7 +30,7 @@ class wxPintCalc(wx.Frame):
         self.debug = debug
 
         # defaults
-        self.quantity = unit.meter
+        self.quantity = 1*unit.meter
 
         self.init_UI()
         self.Show()
@@ -47,7 +47,7 @@ class wxPintCalc(wx.Frame):
     def conv_quantities(self):
         return [self.quantity.to(comp_unit) for comp_unit
                 in sorted(self.quantity.compatible_units(),
-                          key=lambda s: s.lower())]
+                          key=lambda s: str(s).lower())]
 
     @property
     def conv_magnitudes(self):
