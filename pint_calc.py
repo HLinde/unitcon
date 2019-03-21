@@ -67,13 +67,13 @@ class wxPintCalc(wx.Frame):
         self.panel = wx.Panel(self, wx.ID_ANY)
 
     def init_sizer(self):
-        sizer = wx.FlexGridSizer(rows=3, cols=3)
+        sizer = wx.FlexGridSizer(rows=3, cols=3, vgap=10, hgap=10)
 
         empty_txt = wx.StaticText(self.panel, label="")
         magnitude_txt = wx.StaticText(self.panel, label="Magnitude")
         unit_txt = wx.StaticText(self.panel, label="Unit")
-        in_txt = wx.StaticText(self.panel, label="Input")
-        out_txt = wx.StaticText(self.panel, label="Output")
+        in_txt = wx.StaticText(self.panel, label="Input", style=wx.ALIGN_RIGHT)
+        out_txt = wx.StaticText(self.panel, label="Output", style=wx.ALIGN_RIGHT)
 
         mag_c = wx.TextCtrl(self.panel, name='mag_c', style=wx.TE_RIGHT)
         mag_c.SetValue(str(self.magnitude))
@@ -116,7 +116,7 @@ class wxPintCalc(wx.Frame):
         unit_out = self.FindWindowByName('unit_out')
         unit_out.ChangeValue('')
         for un in self.conv_units:
-            unit_out.AppendText(str(un) + "\n\n")
+            unit_out.AppendText(" {}\n\n".format(un))
 
     def magnitude_input(self, event):
         mag_c = self.FindWindowByName('mag_c')
@@ -128,7 +128,7 @@ class wxPintCalc(wx.Frame):
         mag_out = self.FindWindowByName('mag_out')
         mag_out.ChangeValue('')
         for mag in self.conv_magnitudes:
-            mag_out.AppendText("{:.3e}\n\n".format(mag))
+            mag_out.AppendText("{:.3e} \n\n".format(mag))
 
 
 try:
